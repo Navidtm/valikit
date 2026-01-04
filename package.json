@@ -1,0 +1,95 @@
+{
+	"name": "valikit",
+	"version": "0.0.1",
+	"license": "MIT",
+	"description": "Common validators for Zod, Valibot and more - with familiar syntax (zk.slug(), vk.slug())",
+	"types": "./dist/index.d.ts",
+	"main": "./dist/index.js",
+	"module": "./dist/index.mjs",
+	"author": "Navidtm <navidt81@gmail.com>",
+	"packageManager": "pnpm@10.24.0",
+	"sideEffects": false,
+	"private": false,
+	"files": [
+		"dist",
+		"README.md",
+		"LICENSE"
+	],
+	"scripts": {
+		"dev": "tsdown --watch",
+		"build": "tsdown",
+		"build:clean": "tsdown --clean && tsdown",
+		"test": "vitest",
+		"test:watch": "vitest --watch",
+		"test:run": "vitest run",
+		"test:coverage": "vitest run --coverage",
+		"typecheck": "tsc --noEmit",
+		"format": "biome format --write",
+		"lint": "biome lint --fix",
+		"check": "biome check --write",
+		"prepublish": "pnpm run build:clean && pnpm run typecheck && pnpm run test:run",
+		"bump": "changelogen --bump",
+		"release": "changelogen --release"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Navidtm/valikit.git"
+	},
+	"bugs": {
+		"url": "https://github.com/Navidtm/valikit/issues"
+	},
+	"homepage": "https://github.com/Navidtm/valikit#readme",
+	"engines": {
+		"node": ">=20.19.0"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"keywords": [
+		"validation",
+		"schema",
+		"typescript",
+		"utils",
+		"extensions",
+		"zod",
+		"valibot"
+	],
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.mjs",
+			"require": "./dist/index.js"
+		},
+		"./zk": {
+			"types": "./dist/zk/index.d.ts",
+			"import": "./dist/zk/index.mjs",
+			"require": "./dist/zk/index.js"
+		},
+		"./vk": {
+			"types": "./dist/vk/index.d.ts",
+			"import": "./dist/vk/index.mjs",
+			"require": "./dist/vk/index.js"
+		},
+		"./package.json": "./package.json"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.3.10",
+		"@types/node": "^22.19.0",
+		"changelogen": "^0.6.2",
+		"tsdown": "^0.18.2",
+		"typescript": "^5.9.3",
+		"vitest": "^4.0.16"
+	},
+	"peerDependencies": {
+		"valibot": "^0.31.0 || ^1.0.0",
+		"zod": "^3.25.0 || ^4.0.0"
+	},
+	"peerDependenciesMeta": {
+		"zod": {
+			"optional": true
+		},
+		"valibot": {
+			"optional": true
+		}
+	}
+}
