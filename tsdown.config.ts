@@ -3,8 +3,8 @@ import { defineConfig } from 'tsdown';
 export default defineConfig({
 	entry: {
 		index: './src/index.ts',
-		'zk/index': './src/zod/index.ts',
-		'vk/index': './src/valibot/index.ts',
+		'zod/index': './src/zod/index.ts',
+		'valibot/index': './src/valibot/index.ts',
 	},
 	format: ['esm'],
 	dts: true,

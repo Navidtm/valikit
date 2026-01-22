@@ -58,11 +58,11 @@
 			"types": "./dist/index.d.mts",
 			"import": "./dist/index.mjs"
 		},
-		"./zk": {
+		"./zod": {
 			"types": "./dist/zk/index.d.mts",
 			"import": "./dist/zk/index.mjs"
 		},
-		"./vk": {
+		"./valibot": {
 			"types": "./dist/vk/index.d.mts",
 			"import": "./dist/vk/index.mjs"
 		},
