@@ -7,5 +7,4 @@ export const DEFAULT_PASSWORD_OPTIONS = {
 	minUppercase: 1,
 	minNumber: 1,
 	minSymbol: 1,
-	strength: 'strong',
 } as const satisfies Required<PasswordOptions>;
