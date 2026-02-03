@@ -1,17 +1,7 @@
-import * as v from 'valibot';
-import { describe, expect, it } from 'vitest';
+import { describe, it } from 'vitest';
 
 import { vk, zk } from '../../src';
-
-const testpassword = (password: string, shouldPass: boolean) => {
-	// Zod
-	const zodResult = zk.password().safeParse(password);
-	expect(zodResult.success).toBe(shouldPass);
-
-	// Valibot
-	const valibotResult = v.safeParse(vk.password(), password);
-	expect(valibotResult.success).toBe(shouldPass);
-};
+import { expectParsers, testParsers } from '../utils/parser';
 
 describe('password', () => {
 	describe('valid passwords', () => {
@@ -28,7 +18,7 @@ describe('password', () => {
 		];
 
 		it.each(validCases)('should pass - %s ("%s")', ({ password }) => {
-			testpassword(password, true);
+			expectParsers('password', password).toBe(true);
 		});
 	});
 
@@ -54,7 +44,77 @@ describe('password', () => {
 		];
 
 		it.each(invalidCases)('should fail - %s ("%s")', ({ password }) => {
-			testpassword(password, false);
+			expectParsers('password', password).toBe(false);
 		});
+	});
+
+	describe('password (strength)', () => {
+		const strengthCases = [
+			{ password: 'Weakpass1!', expectedStrength: 'weak' },
+			{ password: 'ModerateP@ss2', expectedStrength: 'medium' },
+			{ password: 'StrongP@ssw0rd!3', expectedStrength: 'strong' },
+		] as const;
+
+		it.each(strengthCases)(
+			'should validate strength for %s as %s',
+			({ password, expectedStrength }) => {
+				testParsers(
+					[
+						zk.password().strength(expectedStrength),
+						vk.password().strength(expectedStrength),
+					],
+					password,
+				).toBe(true);
+			},
+		);
+	});
+
+	describe('password (noCommon)', () => {
+		const noCommonCases = [
+			{
+				password: 'P@ssw0rd',
+				shouldPass: false,
+			},
+			{
+				password: 'StrongP@ssw0rd!',
+				shouldPass: true,
+			},
+		] as const;
+
+		it.each(noCommonCases)(
+			'should validate noCommon for %s as %s',
+			({ password, shouldPass }) => {
+				testParsers(
+					[zk.password().noCommon(), vk.password().noCommon()],
+					password,
+				).toBe(shouldPass);
+			},
+		);
+	});
+
+	describe('password (noSpaces)', () => {
+		const noSpacesCases: {
+			password: string;
+			shouldPass: boolean;
+		}[] = [
+			{
+				password: 'No Spaces1!',
+				shouldPass: false,
+			},
+			{
+				password: 'NoSpaces1!',
+				shouldPass: true,
+			},
+		];
+
+		it.each(noSpacesCases)(
+			'should validate noSpaces for %s as %s',
+			({ password, shouldPass }) => {
+				testParsers(
+					[zk.password().noSpaces(), vk.password().noSpaces()],
+					password,
+				).toBe(shouldPass);
+			},
+		);
 	});
 });

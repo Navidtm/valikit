@@ -1,5 +1,13 @@
 import * as z from 'zod';
 
+import { symbolRegex } from '../../core/shared/regexes.js';
+import { COMMON_PASSWORDS } from '../../core/validators/password/common-password.js';
+import { DEFAULT_PASSWORD_OPTIONS } from '../../core/validators/password/constants.js';
+import type {
+	PasswordOptions,
+	PasswordStrength,
+} from '../../core/validators/password/types.js';
+
 /**
  *
  * Password schema
@@ -21,17 +29,39 @@ import * as z from 'zod';
  * ```
  */
 
-const password = () => {
-	const strictSchema = z
-		.string()
-		.min(8)
-		.max(64)
-		.regex(/[A-Z]/)
-		.regex(/[a-z]/)
-		.regex(/[0-9]/)
-		.regex(/[!@#$%^&*(),.?":{}|<>]/);
+export const password = (options?: PasswordOptions) => {
+	const { min, max, minLowercase, minNumber, minSymbol, minUppercase } = {
+		...DEFAULT_PASSWORD_OPTIONS,
+		...options,
+	};
 
-	return strictSchema;
+	const baseSchema = z.string().max(max).min(min);
+
+	const schema = baseSchema
+		.regex(new RegExp(`[a-z]{${minLowercase},}`))
+		.regex(new RegExp(`[0-9]{${minNumber},}`))
+		.regex(new RegExp(`[A-Z]{${minUppercase},}`))
+		.regex(new RegExp(`${symbolRegex}{${minSymbol},}`));
+
+	return Object.assign(schema, {
+		noSpaces: () => schema.regex(/^\S+$/),
+		noCommon: () =>
+			schema.refine((val) => !COMMON_PASSWORDS.has(val.toLowerCase())),
+		strength: (strength: PasswordStrength) => {
+			switch (strength) {
+				case 'weak':
+					return baseSchema;
+				case 'medium':
+					return baseSchema
+						.regex(new RegExp(`[a-z]{${minLowercase},}`))
+						.regex(new RegExp(`[0-9]{${minNumber},}`));
+				case 'strong':
+					return baseSchema
+						.regex(new RegExp(`[a-z]{${minLowercase},}`))
+						.regex(new RegExp(`[0-9]{${minNumber},}`))
+						.regex(new RegExp(`[A-Z]{${minUppercase},}`))
+						.regex(new RegExp(`${symbolRegex}{${minSymbol},}`));
+			}
+		},
+	});
 };
-
-export { password };

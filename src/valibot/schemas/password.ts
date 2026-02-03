@@ -1,5 +1,13 @@
 import * as v from 'valibot';
 
+import { symbolRegex } from '../../core/shared/regexes.js';
+import { COMMON_PASSWORDS } from '../../core/validators/password/common-password.js';
+import { DEFAULT_PASSWORD_OPTIONS } from '../../core/validators/password/constants.js';
+import type {
+	PasswordOptions,
+	PasswordStrength,
+} from '../../core/validators/password/types.js';
+
 /**
  *
  * Password schema
@@ -21,18 +29,48 @@ import * as v from 'valibot';
  * ```
  */
 
-const password = () => {
-	const strictSchema = v.pipe(
-		v.string(),
-		v.minLength(8),
-		v.maxLength(64),
-		v.regex(/[A-Z]/),
-		v.regex(/[a-z]/),
-		v.regex(/[0-9]/),
-		v.regex(/[!@#$%^&*(),.?":{}|<>]/),
+export const password = (options?: PasswordOptions) => {
+	const { min, max, minLowercase, minNumber, minSymbol, minUppercase } = {
+		...DEFAULT_PASSWORD_OPTIONS,
+		...options,
+	};
+
+	const baseSchema = v.pipe(v.string(), v.maxLength(max), v.minLength(min));
+
+	const schema = v.pipe(
+		baseSchema,
+		v.regex(new RegExp(`[a-z]{${minLowercase},}`)),
+		v.regex(new RegExp(`[0-9]{${minNumber},}`)),
+		v.regex(new RegExp(`[A-Z]{${minUppercase},}`)),
+		v.regex(new RegExp(`${symbolRegex}{${minSymbol},}`)),
 	);
 
-	return strictSchema;
+	return Object.assign(schema, {
+		noSpaces: () => v.pipe(schema, v.regex(/^\S+$/)),
+		noCommon: () =>
+			v.pipe(
+				schema,
+				v.check((val) => !COMMON_PASSWORDS.has(val.toLowerCase())),
+			),
+		strength: (strength: PasswordStrength) => {
+			switch (strength) {
+				case 'weak':
+					return v.pipe(baseSchema);
+				case 'medium':
+					return v.pipe(
+						baseSchema,
+						v.regex(new RegExp(`[a-z]{${minLowercase},}`)),
+						v.regex(new RegExp(`[0-9]{${minNumber},}`)),
+					);
+				case 'strong':
+					return v.pipe(
+						baseSchema,
+						v.regex(new RegExp(`[a-z]{${minLowercase},}`)),
+						v.regex(new RegExp(`[0-9]{${minNumber},}`)),
+						v.regex(new RegExp(`[A-Z]{${minUppercase},}`)),
+						v.regex(new RegExp(`${symbolRegex}{${minSymbol},}`)),
+					);
+			}
+		},
+	});
 };
-
-export { password };
