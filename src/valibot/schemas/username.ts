@@ -1,4 +1,10 @@
 import * as v from 'valibot';
+import { DEFAULT_USERNAME_OPTIONS } from '../../core/validators/username/conatants.js';
+import type {
+	ReservedUsernameOptions,
+	UsernameOptions,
+} from '../../core/validators/username/types.js';
+import { createReservedUsernameRegex } from '../../core/validators/username/utils.js';
 
 /**
  * Username schema
@@ -26,14 +32,24 @@ import * as v from 'valibot';
  * v.parse(userSchema, { username: 'this_username_is_way_too_long_to_be_valid' }); // throws error (too long)
  * ```
  */
-const username = () => {
-	// Strict schema: only valid usernames pass
-	const strictSchema = v.pipe(v.string(), v.regex(/^[a-z0-9_]{3,30}$/));
 
-	return Object.assign(strictSchema, {
+export const username = (options?: UsernameOptions) => {
+	const { min, max, pattern } = {
+		...DEFAULT_USERNAME_OPTIONS,
+		...options,
+	};
+
+	// Strict schema: only valid usernames pass
+	const schema = v.pipe(
+		v.string(),
+		v.minLength(min),
+		v.maxLength(max),
+		v.regex(pattern),
+	);
+
+	return Object.assign(schema, {
 		/**
-		 * Coerce username
-		 *
+		 * to sanitize/normalize usernames
 		 * @example
 		 * ```ts
 		 * v.parse(vk.username().coerce(), '  User Name !@#  ')  // → 'user_name'
@@ -47,9 +63,23 @@ const username = () => {
 				v.toLowerCase(),
 				v.transform((val) => val.replace(/[^a-z0-9_\s]/g, '').trim()), // remove any remaining invalid chars
 				v.transform((val) => val.replace(/\s+/g, '_')), // replace spaces with underscore
-				v.regex(/^[a-z0-9_]{3,30}$/),
+				schema,
+			),
+
+		/**
+		 *
+		 * @param options
+		 * @example
+		 * ```ts
+		 *
+		 * zk.username().noReserved().parse('admin'); // throws error
+		 *
+		 * ```
+		 */
+		noReserved: (options?: ReservedUsernameOptions) =>
+			v.pipe(
+				schema,
+				v.check((v) => !createReservedUsernameRegex(options).test(v)),
 			),
 	});
 };
-
-export { username };

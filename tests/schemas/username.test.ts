@@ -1,28 +1,6 @@
-import * as v from 'valibot';
-import { describe, expect, it } from 'vitest';
-
+import { describe, it } from 'vitest';
 import { vk, zk } from '../../src';
-
-const testCoerceUsername = (username: string, output: string) => {
-	// Zod
-	const zodResult = zk.username().coerce().safeParse(username);
-	expect(zodResult.data).toBe(output);
-
-	// Valibot
-	const valibotResult = v.safeParse(vk.username().coerce(), username);
-
-	expect(valibotResult.output).toBe(output);
-};
-
-const testUsername = (username: string, shouldPass: boolean) => {
-	// Zod
-	const zodResult = zk.username().safeParse(username);
-	expect(zodResult.success).toBe(shouldPass);
-
-	// Valibot
-	const valibotResult = v.safeParse(vk.username(), username);
-	expect(valibotResult.success).toBe(shouldPass);
-};
+import { expectParsers, testParsers, testResultParsers } from '../utils/parser';
 
 describe('username', () => {
 	describe('valid usernames', () => {
@@ -35,7 +13,7 @@ describe('username', () => {
 		];
 
 		it.each(validCases)('should pass - %s ("%s")', ({ username }) => {
-			testUsername(username, true);
+			expectParsers('username', username).toBe(true);
 		});
 	});
 
@@ -58,7 +36,7 @@ describe('username', () => {
 		];
 
 		it.each(invalidCases)('should fail - %s ("%s")', ({ username }) => {
-			testUsername(username, false);
+			expectParsers('username', username).toBe(false);
 		});
 	});
 
@@ -87,7 +65,42 @@ describe('username', () => {
 		];
 
 		it.each(validCases)('should be - %s ("%s")', ({ username, expect }) => {
-			testCoerceUsername(username, expect);
+			testResultParsers(
+				[zk.username().coerce(), vk.username().coerce()],
+				username,
+			).toBe(expect);
+		});
+
+		describe('username (coerce) invalid cases', () => {
+			const invalidCases = [
+				{
+					username: '  !!@@##  ',
+					desc: 'only invalid characters',
+				},
+				{
+					username: '  a  ',
+					desc: 'too short after coercion',
+				},
+				{
+					username: '  this_username_is_way_too_long_to_be_valid  ',
+					desc: 'too long after coercion',
+				},
+			];
+
+			it.each(invalidCases)('should fail - %s ("%s")', ({ username }) => {
+				expectParsers('username', username).toBe(false);
+			});
+		});
+
+		describe('username (noReservedWords)', () => {
+			const reservedWords = ['admin', 'root', 'system', 'administrator'];
+
+			it.each(reservedWords)('should fail - %s', (word) => {
+				testParsers(
+					[zk.username().noReserved(), vk.username().noReserved()],
+					word,
+				).toBe(false);
+			});
 		});
 	});
 });

@@ -45,6 +45,24 @@ export const testParsers = (schemas: [ZodType, unknown], data: unknown) => {
 	};
 };
 
+export const testResultParsers = (
+	schemas: [ZodType, unknown],
+	data: unknown,
+) => {
+	// Zod
+	const zodResult = safeParseZod(schemas[0] as ZodType, data);
+
+	// Valibot
+	const valibotResult = safeParseValibot(schemas[1] as AnySchema, data);
+
+	return {
+		toBe: (expected: unknown) => {
+			expect(valibotResult.output).toBe(expected);
+			expect(zodResult.data).toBe(expected);
+		},
+	};
+};
+
 export const expectParsers = (
 	method: keyof typeof zk & keyof typeof vk,
 	data: unknown,

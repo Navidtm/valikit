@@ -1,4 +1,10 @@
 import * as z from 'zod';
+import { DEFAULT_USERNAME_OPTIONS } from '../../core/validators/username/conatants.js';
+import type {
+	ReservedUsernameOptions,
+	UsernameOptions,
+} from '../../core/validators/username/types.js';
+import { createReservedUsernameRegex } from '../../core/validators/username/utils.js';
 
 /**
  * Username schema
@@ -28,15 +34,19 @@ import * as z from 'zod';
  * ```
  */
 
-const username = () => {
+export const username = (options?: UsernameOptions) => {
+	const { min, max, pattern } = {
+		...DEFAULT_USERNAME_OPTIONS,
+		...options,
+	};
+
 	// Strict schema: only valid usernames pass
-	const strictSchema = z.string().regex(/^[a-z0-9_]{3,30}$/);
+	const schema = z.string().min(min).max(max).regex(pattern);
 
 	// Return schema with chainable .sanitize() method
-	return Object.assign(strictSchema, {
+	return Object.assign(schema, {
 		/**
-		 * Coerce username
-		 *
+		 * to sanitize/normalize usernames
 		 * @example
 		 * ```ts
 		 *
@@ -51,8 +61,21 @@ const username = () => {
 				.toLowerCase()
 				.transform((val) => val.replace(/[^a-z0-9_\s]/g, '').trim()) // remove any remaining invalid chars
 				.transform((val) => val.replace(/\s+/g, '_')) // replace spaces with underscore
-				.pipe(strictSchema), // final strict validation (length + regex)
+				.pipe(schema), // final strict validation (length + regex)
+
+		/**
+		 *
+		 * @param options
+		 * @example
+		 * ```ts
+		 *
+		 * zk.username().noReserved().parse('admin'); // throws error
+		 *
+		 * ```
+		 */
+		noReserved: (options?: ReservedUsernameOptions) =>
+			schema
+				.refine((v) => !createReservedUsernameRegex(options).test(v))
+				.pipe(schema),
 	});
 };
-
-export { username };
