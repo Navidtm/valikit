@@ -22,6 +22,36 @@ import * as v from 'valibot';
  * ```
  */
 
-const slug = () => v.pipe(v.string(), v.regex(/^[a-z0-9]+(-[a-z0-9]+)*$/));
+export const slug = () => {
+	const schema = v.pipe(v.string(), v.regex(/^[a-z0-9]+(-[a-z0-9]+)*$/));
 
-export { slug };
+	return Object.assign(schema, {
+		/**
+		 *  to sanitize/normalize slug
+		 *
+		 * @example
+		 * ```ts
+		 *
+		 * vk.parse(vk.slug().coerce(), '  Params '); // → 'params'
+		 *
+		 * ```
+		 */
+		coerce: () =>
+			v.pipe(
+				v.string(),
+				v.trim(),
+				v.toLowerCase(),
+				v.minLength(1),
+				v.transform((input) =>
+					input
+						.normalize('NFKD')
+						.replace(/\p{Diacritic}/gu, '')
+						.replace(/[^a-z0-9\s-]/gi, '')
+						.replace(/\s+/g, '-')
+						.replace(/--+/g, '-')
+						.replace(/^-+|-+$/g, ''),
+				),
+				schema,
+			),
+	});
+};

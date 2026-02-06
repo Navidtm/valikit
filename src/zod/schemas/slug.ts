@@ -22,6 +22,35 @@ import * as z from 'zod';
  * ```
  */
 
-const slug = () => z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/);
+export const slug = () => {
+	const schema = z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/);
 
-export { slug };
+	return Object.assign(schema, {
+		/**
+		 *  to sanitize/normalize slug
+		 *
+		 * @example
+		 * ```ts
+		 *
+		 * zk.slug().coerce().parse('  Params '); // → 'params'
+		 *
+		 * ```
+		 */
+		coerce: () =>
+			z
+				.string()
+				.trim()
+				.toLowerCase()
+				.min(1)
+				.transform((v) =>
+					v
+						.normalize('NFKD')
+						.replace(/\p{Diacritic}/gu, '')
+						.replace(/[^a-z0-9\s-]/gi, '')
+						.replace(/\s+/g, '-')
+						.replace(/--+/g, '-')
+						.replace(/^-+|-+$/g, ''),
+				)
+				.pipe(schema),
+	});
+};
