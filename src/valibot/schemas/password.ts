@@ -1,12 +1,12 @@
 import * as v from 'valibot';
 
+import { COMMON_PASSWORDS } from '../../core/consts/common-password.js';
+import { DEFAULT_PASSWORD_OPTIONS } from '../../core/shared/constants.js';
 import { symbolRegex } from '../../core/shared/regexes.js';
-import { COMMON_PASSWORDS } from '../../core/validators/password/common-password.js';
-import { DEFAULT_PASSWORD_OPTIONS } from '../../core/validators/password/constants.js';
 import type {
 	PasswordOptions,
 	PasswordStrength,
-} from '../../core/validators/password/types.js';
+} from '../../core/shared/types.js';
 
 /**
  *

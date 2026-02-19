@@ -1,10 +1,11 @@
 import * as z from 'zod';
-import { DEFAULT_USERNAME_OPTIONS } from '../../core/validators/username/conatants.js';
+
+import { DEFAULT_USERNAME_OPTIONS } from '../../core/shared/constants.js';
 import type {
 	ReservedUsernameOptions,
 	UsernameOptions,
-} from '../../core/validators/username/types.js';
-import { createReservedUsernameRegex } from '../../core/validators/username/utils.js';
+} from '../../core/shared/types.js';
+import { createReservedUsername } from '../../core/utils/createReservedUsername.js';
 
 /**
  * Username schema
@@ -75,7 +76,7 @@ export const username = (options?: UsernameOptions) => {
 		 */
 		noReserved: (options?: ReservedUsernameOptions) =>
 			schema
-				.refine((v) => !createReservedUsernameRegex(options).test(v))
+				.refine((v) => !createReservedUsername(options).test(v))
 				.pipe(schema),
 	});
 };

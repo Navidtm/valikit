@@ -1,3 +1,6 @@
+/**
+ * List of common passwords that should be blocked by the password validator.
+ */
 export const COMMON_PASSWORDS = new Set<string>([
 	'123456',
 	'admin',

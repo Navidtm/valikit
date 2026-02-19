@@ -1,5 +1,5 @@
-import { RESERVED_USERNAMES } from './reserved-usernames.js';
-import type { ReservedUsernameOptions } from './types.js';
+import { RESERVED_USERNAMES } from '../consts/reserved-usernames.js';
+import type { ReservedUsernameOptions } from '../shared/types.js';
 
 /**
  * Creates a RegExp that matches reserved usernames and common variations.
@@ -11,7 +11,7 @@ import type { ReservedUsernameOptions } from './types.js';
  * @param options - Customization options
  * @returns RegExp that returns true if the username is reserved/forbidden
  */
-export function createReservedUsernameRegex(
+export function createReservedUsername(
 	options: ReservedUsernameOptions = {},
 ): RegExp {
 	const {
@@ -53,9 +53,3 @@ export function createReservedUsernameRegex(
 	// Case-insensitive
 	return new RegExp(pattern, 'i');
 }
-
-// Default regex instance (used in most validators)
-export const defaultReservedRegex = createReservedUsernameRegex({
-	minNumericSuffixLength: 1, // Blocks admin1, admin01, admin123...
-	allowUnderscoreSuffix: false, // Blocks admin_team, root_user...
-});
