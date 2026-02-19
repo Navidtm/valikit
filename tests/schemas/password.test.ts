@@ -1,120 +1,107 @@
 import { describe, it } from 'vitest';
-
 import { vk, zk } from '../../src';
-import { expectParsers, testParsers } from '../utils/parser';
+import type { PasswordStrength } from '../../src/core/shared/types';
+import type { TestCases } from '../types';
+import { testParsers, testSchema } from '../utils/parser';
 
 describe('password', () => {
 	describe('valid passwords', () => {
-		const validCases = [
-			{ password: 'StrongP@ssw0rd!', desc: 'password - 1' },
-			{ password: 'An0ther$trongPass', desc: 'password - 2' },
-			{ password: 'Valid#Password123', desc: 'password - 3' },
+		const testCases: TestCases = [
+			{ value: 'StrongP@ssw0rd!', desc: 'password - 1' },
+			{ value: 'An0ther$trongPass', desc: 'password - 2' },
+			{ value: 'Valid#Password123', desc: 'password - 3' },
 			{
-				password:
+				value:
 					'Valid**And*%Strong#Password&^123_456_789%@With$%Maximum*&Length!',
 				desc: 'maximum length',
 			},
-			{ password: 'aaA1123!', desc: 'minimum length' },
+			{ value: 'aaA1123!', desc: 'minimum length' },
 		];
 
-		it.each(validCases)('should pass - %s ("%s")', ({ password }) => {
-			expectParsers('password', password).toBe(true);
+		it.each(testCases)(
+			'should pass - $value ($desc)',
+			testSchema([zk.password(), vk.password()], true),
+		);
+
+		describe('invalid passwords', () => {
+			const invalidCases: TestCases = [
+				{
+					value: 'weakpass',
+					desc: 'too short, no uppercase, no number, no special char',
+				},
+				{ value: 'Short1!', desc: 'too short' },
+				{
+					value:
+						'ThisPasswordIsWayTooLongToBeConsideredValidBecauseItExceedsTheMaximumLength1!',
+					desc: 'too long',
+				},
+				{ value: 'nouppercase1!', desc: 'no uppercase letter' },
+				{ value: 'NOLOWERCASE1!', desc: 'no lowercase letter' },
+				{ value: '', desc: 'empty string' },
+				{ value: 'pecialChar', desc: 'no number' },
+				{ value: 'NoSpecialChar1', desc: ' no special character' },
+				{ value: '用户', desc: 'non-latin characters' },
+				{ value: '  ', desc: 'only whitespace' },
+			];
+
+			it.each(invalidCases)(
+				'should fail - %value ($desc)',
+				testSchema([zk.password(), vk.password()], false),
+			);
 		});
-	});
 
-	describe('invalid passwords', () => {
-		const invalidCases = [
-			{
-				password: 'weakpass',
-				desc: 'too short, no uppercase, no number, no special char',
-			},
-			{ password: 'Short1!', desc: 'too short' },
-			{
-				password:
-					'ThisPasswordIsWayTooLongToBeConsideredValidBecauseItExceedsTheMaximumLength1!',
-				desc: 'too long',
-			},
-			{ password: 'nouppercase1!', desc: 'no uppercase letter' },
-			{ password: 'NOLOWERCASE1!', desc: 'no lowercase letter' },
-			{ password: '', desc: 'empty string' },
-			{ password: 'pecialChar', desc: 'no number' },
-			{ password: 'NoSpecialChar1', desc: ' no special character' },
-			{ password: '用户', desc: 'non-latin characters' },
-			{ password: '  ', desc: 'only whitespace' },
-		];
+		describe('password (strength)', () => {
+			const strengthCases: TestCases<PasswordStrength> = [
+				{ value: 'Weakpass1!', desc: 'weak', options: 'weak' },
+				{ value: 'ModerateP@ss2', desc: 'medium', options: 'medium' },
+				{ value: 'StrongP@ssw0rd!3', desc: 'strong', options: 'weak' },
+			];
 
-		it.each(invalidCases)('should fail - %s ("%s")', ({ password }) => {
-			expectParsers('password', password).toBe(false);
+			it.each(strengthCases)(
+				'should validate strength for %s as %s',
+				({ value, options = 'weak' }) => {
+					testParsers(
+						[zk.password().strength(options), vk.password().strength(options)],
+						value,
+					).toBe(true);
+				},
+			);
 		});
-	});
 
-	describe('password (strength)', () => {
-		const strengthCases = [
-			{ password: 'Weakpass1!', expectedStrength: 'weak' },
-			{ password: 'ModerateP@ss2', expectedStrength: 'medium' },
-			{ password: 'StrongP@ssw0rd!3', expectedStrength: 'strong' },
-		] as const;
+		describe('password (noCommon)', () => {
+			const noCommonCases = [
+				{
+					value: 'P@ssw0rd',
+					expected: false,
+				},
+				{
+					value: 'StrongP@ssw0rd!',
+					expected: true,
+				},
+			] as const;
 
-		it.each(strengthCases)(
-			'should validate strength for %s as %s',
-			({ password, expectedStrength }) => {
-				testParsers(
-					[
-						zk.password().strength(expectedStrength),
-						vk.password().strength(expectedStrength),
-					],
-					password,
-				).toBe(true);
-			},
-		);
-	});
+			it.each(noCommonCases)(
+				'should validate noCommon for %s as %s',
+				testSchema([zk.password().noCommon(), vk.password().noCommon()]),
+			);
+		});
 
-	describe('password (noCommon)', () => {
-		const noCommonCases = [
-			{
-				password: 'P@ssw0rd',
-				shouldPass: false,
-			},
-			{
-				password: 'StrongP@ssw0rd!',
-				shouldPass: true,
-			},
-		] as const;
+		describe('password (noSpaces)', () => {
+			const noSpacesCases = [
+				{
+					value: 'No Spaces1!',
+					expected: false,
+				},
+				{
+					value: 'NoSpaces1!',
+					expected: true,
+				},
+			] as const;
 
-		it.each(noCommonCases)(
-			'should validate noCommon for %s as %s',
-			({ password, shouldPass }) => {
-				testParsers(
-					[zk.password().noCommon(), vk.password().noCommon()],
-					password,
-				).toBe(shouldPass);
-			},
-		);
-	});
-
-	describe('password (noSpaces)', () => {
-		const noSpacesCases: {
-			password: string;
-			shouldPass: boolean;
-		}[] = [
-			{
-				password: 'No Spaces1!',
-				shouldPass: false,
-			},
-			{
-				password: 'NoSpaces1!',
-				shouldPass: true,
-			},
-		];
-
-		it.each(noSpacesCases)(
-			'should validate noSpaces for %s as %s',
-			({ password, shouldPass }) => {
-				testParsers(
-					[zk.password().noSpaces(), vk.password().noSpaces()],
-					password,
-				).toBe(shouldPass);
-			},
-		);
+			it.each(noSpacesCases)(
+				'should validate noSpaces for %s as %s',
+				testSchema([zk.password().noSpaces(), vk.password().noSpaces()]),
+			);
+		});
 	});
 });

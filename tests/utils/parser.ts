@@ -3,6 +3,7 @@ import * as v from 'valibot';
 import { expect } from 'vitest';
 import type { ZodType } from 'zod';
 import { vk, zk } from '../../src';
+import type { TestCase } from '../types';
 
 export const parseZod = (schema: ZodType, data: unknown) => schema.parse(data);
 
@@ -15,30 +16,15 @@ export const safeParseZod = (schema: ZodType, data: unknown) =>
 export const safeParseValibot = (schema: v.AnySchema, data: unknown) =>
 	v.safeParse(schema, data);
 
-export const assertZodError = (error: unknown, message: string) => {
-	if (error instanceof Error) {
-		expect(error.message).toContain(message);
-	} else {
-		throw new Error('The provided error is not an instance of Error');
-	}
-};
-export const assertValibotError = (error: unknown, message: string) => {
-	if (error instanceof Error) {
-		expect(error.message).toContain(message);
-	} else {
-		throw new Error('The provided error is not an instance of Error');
-	}
-};
-
 export const testParsers = (schemas: [ZodType, unknown], data: unknown) => {
 	// Zod
-	const zodResult = safeParseZod(schemas[0] as ZodType, data);
+	const zodResult = schemas[0].safeParse(data);
 
 	// Valibot
-	const valibotResult = safeParseValibot(schemas[1] as AnySchema, data);
+	const valibotResult = v.safeParse(schemas[1] as AnySchema, data);
 
 	return {
-		toBe: (expected: boolean) => {
+		toBe: (expected: unknown) => {
 			expect(valibotResult.success).toBe(expected);
 			expect(zodResult.success).toBe(expected);
 		},
@@ -46,11 +32,11 @@ export const testParsers = (schemas: [ZodType, unknown], data: unknown) => {
 };
 
 export const testResultParsers = (
-	schemas: [ZodType, unknown],
+	schemas: [ZodType, AnySchema | unknown],
 	data: unknown,
 ) => {
 	// Zod
-	const zodResult = safeParseZod(schemas[0] as ZodType, data);
+	const zodResult = safeParseZod(schemas[0], data);
 
 	// Valibot
 	const valibotResult = safeParseValibot(schemas[1] as AnySchema, data);
@@ -66,4 +52,18 @@ export const testResultParsers = (
 export const expectParsers = (
 	method: keyof typeof zk & keyof typeof vk,
 	data: unknown,
-) => testParsers([zk[method](), vk[method]()], data);
+) => testParsers([zk[method](), vk[method]() as unknown as AnySchema], data);
+
+export const testResultSchema =
+	(schemas: [ZodType, unknown], defaultExpected?: unknown) =>
+	({ value, expected }: TestCase) =>
+		testResultParsers(schemas as [ZodType, AnySchema], value).toBe(
+			expected ?? defaultExpected,
+		);
+
+export const testSchema =
+	(schemas: [ZodType, unknown], defaultExpected?: unknown) =>
+	({ value, expected }: TestCase) =>
+		testParsers(schemas as [ZodType, AnySchema], value).toBe(
+			expected ?? defaultExpected,
+		);
