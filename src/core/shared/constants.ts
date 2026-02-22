@@ -1,4 +1,7 @@
+import { nicknameRegex } from './regexes.js';
+
 import type {
+	NickNameOptions,
 	PasswordOptions,
 	ReservedUsernameOptions,
 	UsernameOptions,
@@ -23,4 +26,10 @@ export const DEFAULT_PASSWORD_OPTIONS: Required<PasswordOptions> = {
 	minUppercase: 1,
 	minNumber: 1,
 	minSymbol: 1,
+} as const;
+
+export const DEFAULT_NICKNAME_OPTIONS: Required<NickNameOptions> = {
+	min: 3,
+	max: 30,
+	regex: nicknameRegex
 } as const;

@@ -60,3 +60,21 @@ export type PasswordOptions = Partial<{
 	 */
 	minSymbol: number;
 }>;
+
+export interface NickNameOptions {
+	/**
+	 * Minimum length of the nickname.
+	 * @default 3
+	 */
+	min?: number;
+	/**
+	 * Maximum length of the nickname.
+	 * @default 30
+	 */
+	max?: number;
+	/**
+	 * Nickname regex pattern
+	 * @default /^[a-zA-Z0-9_.-]+$/
+	 */
+	regex?: RegExp;
+}
