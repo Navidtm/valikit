@@ -1,7 +1,7 @@
 export type TestCase<T = unknown> = {
-	value: string;
+	value: unknown;
 	desc?: string;
-	expected?: string | boolean;
+	expected?: unknown;
 	options?: T;
 };
 

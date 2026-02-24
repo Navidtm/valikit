@@ -78,3 +78,16 @@ export interface NickNameOptions {
 	 */
 	regex?: RegExp;
 }
+
+export interface AgeOptions {
+	/**
+	 * Minimum allowed age.
+	 * @default 0
+	 */
+	min?: number;
+	/**
+	 * Maximum allowed age (logical human age).
+	 * @default 150
+	 */
+	max?: number;
+}
