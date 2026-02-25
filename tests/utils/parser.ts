@@ -43,8 +43,8 @@ export const testResultParsers = (
 
 	return {
 		toBe: (expected: unknown) => {
-			expect(valibotResult.output).toBe(expected);
-			expect(zodResult.data).toBe(expected);
+			expect(valibotResult.output).toEqual(expected);
+			expect(zodResult.data).toEqual(expected);
 		},
 	};
 };
