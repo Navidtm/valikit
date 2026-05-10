@@ -2,7 +2,7 @@
 	"name": "valikit",
 	"version": "0.0.1",
 	"license": "MIT",
-	"description": "Common validators for Zod, Valibot and more",
+	"description": "A collection of validators for Zod & Valibot",
 	"author": "Navidtm <navidt81@gmail.com>",
 	"packageManager": "pnpm@10.30.2",
 	"sideEffects": false,
@@ -69,15 +69,15 @@
 		"./package.json": "./package.json"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.4.4",
-		"@types/node": "^24.10.13",
+		"@biomejs/biome": "2.4.15",
+		"@types/node": "^24.12.3",
 		"changelogen": "^0.6.2",
-		"publint": "^0.3.17",
-		"tsdown": "^0.20.3",
-		"typescript": "^5.9.3",
-		"valibot": "^1.2.0",
-		"vitest": "^4.0.18",
-		"zod": "^4.3.6"
+		"publint": "^0.3.20",
+		"tsdown": "^0.22.0",
+		"typescript": "^6.0.3",
+		"valibot": "^1.4.0",
+		"vitest": "^4.1.5",
+		"zod": "^4.4.3"
 	},
 	"peerDependencies": {
 		"valibot": "^1.5.0",
