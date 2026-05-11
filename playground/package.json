@@ -1,0 +1,11 @@
+{
+  "name": "valikit-playground",
+  "private": true,
+  "scripts": {
+    "dev": "node play.ts"
+  },
+  "type": "module",
+  "dependencies": {
+    "valikit": "workspace:*"
+  }
+}
