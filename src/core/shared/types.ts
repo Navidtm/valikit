@@ -91,3 +91,21 @@ export interface AgeOptions {
 	 */
 	max?: number;
 }
+
+export interface BirthDateOptions {
+	/**
+	 * Minimum age in years. The birth date must be at least this many years ago.
+	 */
+	minAge?: number;
+	/**
+	 * Maximum age in years. The birth date must be no more than this many years ago.
+	 */
+	maxAge?: number;
+	/**
+	 * Optional death date to calculate age at the time of death instead of current age. If provided, the birth date must be at least `minAge` years before the death date and no more than `maxAge` years before the death date.
+	 * Note: If `deathDate` is provided, the age will be calculated based on the difference between the birth date and the death date instead of the current date.
+	 * This allows for validating historical birth dates or calculating age at the time of death.
+	 * The `deathDate` must be a valid Date object and must be after the birth date.
+	 */
+	deathDate?: Date | string | number;
+}
