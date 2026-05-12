@@ -54,18 +54,9 @@
 		"valibot"
 	],
 	"exports": {
-		".": {
-			"types": "./dist/index.d.mts",
-			"import": "./dist/index.mjs"
-		},
-		"./zod": {
-			"types": "./dist/zod/index.d.mts",
-			"import": "./dist/zod/index.mjs"
-		},
-		"./valibot": {
-			"types": "./dist/valibot/index.d.mts",
-			"import": "./dist/valibot/index.mjs"
-		},
+		".": "./dist/index.mjs",
+		"./valibot": "./dist/valibot/index.mjs",
+		"./zod": "./dist/zod/index.mjs",
 		"./package.json": "./package.json"
 	},
 	"devDependencies": {
