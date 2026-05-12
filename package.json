@@ -59,12 +59,12 @@
 			"import": "./dist/index.mjs"
 		},
 		"./zod": {
-			"types": "./dist/zk/index.d.mts",
-			"import": "./dist/zk/index.mjs"
+			"types": "./dist/zod/index.d.mts",
+			"import": "./dist/zod/index.mjs"
 		},
 		"./valibot": {
-			"types": "./dist/vk/index.d.mts",
-			"import": "./dist/vk/index.mjs"
+			"types": "./dist/valibot/index.d.mts",
+			"import": "./dist/valibot/index.mjs"
 		},
 		"./package.json": "./package.json"
 	},
